@@ -2,11 +2,12 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, \
     login_required
 from app import app, db, lm, oid
-from .forms import LoginForm
+from .forms import LoginForm, EditForm
 from .models import User
 from datetime import datetime
 
-
+#This function is used by Flask-Login.
+#The @lm.user_loader decorator registers the function with Flask-Login.
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -14,11 +15,12 @@ def load_user(id):
 
 @app.before_request
 def before_request():
-    g.user = current_user
+    g.user = current_user #The current_user global is set by Flask-Login
     if g.user.is_authenticated():
         g.user.last_seen = datetime.utcnow()
         db.session.add(g.user)
         db.session.commit()
+        print g.user
 
 
 @app.route('/')
@@ -72,6 +74,7 @@ def user(nickname):
                            user=user,
                            posts=posts)
 
+
 @oid.after_login
 def after_login(resp):
     if resp.email is None or resp.email == "":
@@ -91,6 +94,24 @@ def after_login(resp):
         session.pop('remember_me', None)
     login_user(user, remember=remember_me)
     return redirect(request.args.get('next') or url_for('index'))
+
+
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+    form = EditForm()
+    if form.validate_on_submit():
+        g.user.nickname = form.nickname.data
+        g.user.about_me = form.about_me.data
+        db.session.add(g.user)
+        db.session.commit()
+        flash('Your changes have been saved.')
+        return redirect(url_for('edit'))
+    else:
+        form.nickname.data = g.user.nickname
+        form.about_me.data = g.user.about_me
+    return render_template('edit.html', form=form)
+
 
 @app.route('/logout')
 def logout():
