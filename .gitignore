@@ -11,5 +11,5 @@
 /*.db
 # Ignore all logfiles and tempfiles.
 /tmp
-/config.py
-/.gitignore~
+config.py
+.gitignore~
