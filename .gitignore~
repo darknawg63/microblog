@@ -11,4 +11,3 @@
 /*.db
 # Ignore all logfiles and tempfiles.
 /tmp
-/config.py
