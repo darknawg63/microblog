@@ -1,7 +1,7 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, BooleanField, TextAreaField, TextField
+from wtforms import StringField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length
-from app.models import User
+from .models import User
 
 
 class LoginForm(Form):
@@ -10,7 +10,7 @@ class LoginForm(Form):
 
 
 class EditForm(Form):
-    nickname = TextField('nickname', validators=[DataRequired()])
+    nickname = StringField('nickname', validators=[DataRequired()])
     about_me = TextAreaField('about_me', validators=[Length(min=0, max=140)])
 
     def __init__(self, original_nickname, *args, **kwargs):
@@ -23,7 +23,12 @@ class EditForm(Form):
         if self.nickname.data == self.original_nickname:
             return True
         user = User.query.filter_by(nickname=self.nickname.data).first()
-        if user != None:
-            self.nickname.errors.append('This nickname is already in use. Please choose another one.')
+        if user is not None:
+            self.nickname.errors.append('This nickname is already in use. '
+                                        'Please choose another one.')
             return False
         return True
+
+
+class PostForm(Form):
+    post = StringField('post', validators=[DataRequired()])
