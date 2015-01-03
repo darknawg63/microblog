@@ -7,6 +7,7 @@ from .forms import LoginForm, EditForm, PostForm
 from .models import User, Post
 from config import POSTS_PER_PAGE
 from forms import SearchForm
+from emails import follower_notification
 
 
 @lm.user_loader
@@ -148,8 +149,8 @@ def follow(nickname):
     db.session.add(u)
     db.session.commit()
     flash('You are now following ' + nickname + '!')
+    follower_notification(user, g.user)
     return redirect(url_for('user', nickname=nickname))
-
 
 @app.route('/unfollow/<nickname>')
 def unfollow(nickname):
