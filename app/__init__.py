@@ -14,6 +14,9 @@ lm.init_app(app)
 lm.login_view = 'login'
 oid = OpenID(app, os.path.join(basedir, 'tmp'))
 
+from momentjs import momentjs
+app.jinja_env.globals['momentjs'] = momentjs
+
 from flask.ext.mail import Mail
 mail = Mail(app)
 
